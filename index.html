@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+  </head>
+  <body>
+
+
+    <script>
+      var context = new webkitAudioContext();
+      var source = context.createBufferSource();
+      var bufferSize = 256;
+      var analyser = context.createAnalyser();
+      analyser.fftSize = bufferSize / 2;
+      var processor = context.createScriptProcessor(bufferSize, 1, 1);
+      var fft = new Uint8Array(analyser.fftSize / 2);
+
+      /** event at http://www.w3.org/TR/webaudio/#AudioProcessingEvent-section */
+      processor.onaudioprocess = function(event) {
+        analyser.getByteFrequencyData(fft);
+        console.log(fft);
+      };
+
+      // Load MP3
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', './OneDrop.mp3', true);
+      xhr.responseType = 'arraybuffer';
+      xhr.onload = function() {
+        context.decodeAudioData(xhr.response, function(decoded) {
+          source.buffer = decoded;
+          source.connect(analyser);
+          analyser.connect(processor);
+          processor.connect(context.destination);
+          source.start(0);
+        }, function() {
+          console.log('error');
+          console.log(arguments);
+        });
+      };
+      xhr.send();
+    </script>
+  </body>
+</html>
