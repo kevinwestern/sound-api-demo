@@ -8,18 +8,36 @@
 
     <script>
       // guide from https://github.com/jsantell/browser-dance-party-slides/blob/master/index.html
+
+      var SAMPLE_RATE = 44100;
+      var NYQUITS = SAMPLE_RATE / 2;
+      var BUFFER_SIZE = 2048;
+      var FFT_SIZE = BUFFER_SIZE / 2;
+      var BIN_COUNT = FFT_SIZE / 2;
+
       var context = new webkitAudioContext();
       var source = context.createBufferSource();
-      var bufferSize = 256;
       var analyser = context.createAnalyser();
-      analyser.fftSize = bufferSize / 2;
-      var processor = context.createScriptProcessor(bufferSize, 1, 1);
-      var fft = new Uint8Array(analyser.fftSize / 2);
+      var processor = context.createScriptProcessor(BUFFER_SIZE, 1, 1);
+      var fft = new Uint8Array(BIN_COUNT);
+
+      analyser.fftSize = FFT_SIZE;
+
+      // frequency per bin = nyquits / binCount
 
       /** event at http://www.w3.org/TR/webaudio/#AudioProcessingEvent-section */
       processor.onaudioprocess = function(event) {
         analyser.getByteFrequencyData(fft);
-        console.log(fft);
+        var max = 0;
+        var maxBin = -1;
+
+        for (var i = 0; i < BIN_COUNT; i++) {
+          if (fft[i] > max) {
+            max = fft[i];
+            maxBin = i;
+          }
+        }
+        console.log(maxBin, max);
       };
 
       // Load MP3
