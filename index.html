@@ -15,6 +15,19 @@
     <script src="//connect.soundcloud.com/sdk.js"></script>
     <script>
       var tunes = angular.module('tunes', ['ngRoute']);
+      tunes.factory('SC', function() {
+        SC.initialize({
+          client_id: "03df9f6042735bc274cc6c6b27aaf6f7",
+          redirect_uri: "http://localhost:8000/callback.html",
+        });
+        SC.connect(function() {
+          SC.get('/me', function(me) {
+            SC.get('/playlists', {user_id: me.id}, function(playlists) {
+              console.log(playlists);
+            })
+          });
+        });
+      });
       tunes.controller('HomeCtrl', ['$scope', function($scope) {
         $scope.name = 'world';
       }]);
@@ -32,17 +45,7 @@
       
     </script>
     <script>
-      SC.initialize({
-        client_id: "03df9f6042735bc274cc6c6b27aaf6f7",
-        redirect_uri: "http://localhost:8000/callback.html",
-      });
-      SC.connect(function() {
-        SC.get('/me', function(me) { 
-          SC.get('/playlists', {user_id: me.id}, function(playlists) {
-            console.log(playlists);
-          })
-        });
-      });
+      
       
 //      SC.get('http://api.soundcloud.com')
     </script>
