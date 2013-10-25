@@ -5,13 +5,15 @@
   </head>
   <body>
 
+    <svg><</svg>
 
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <script>
       // guide from https://github.com/jsantell/browser-dance-party-slides/blob/master/index.html
 
       var SAMPLE_RATE = 44100;
       var NYQUITS = SAMPLE_RATE / 2;
-      var BUFFER_SIZE = 2048;
+      var BUFFER_SIZE = 256;
       var FFT_SIZE = BUFFER_SIZE / 2;
       var BIN_COUNT = FFT_SIZE / 2;
 
@@ -20,29 +22,43 @@
       var analyser = context.createAnalyser();
       var processor = context.createScriptProcessor(BUFFER_SIZE, 1, 1);
       var fft = new Uint8Array(BIN_COUNT);
+      var xScale = d3.scale.linear().domain([1, BIN_COUNT]).range([25, 1000]);
+      var yScale = d3.scale.linear().domain([0, 350]).range([10, 600]);
+      var svg = d3.select('svg').append('g');
+      var rects;
 
       analyser.fftSize = FFT_SIZE;
+
 
       // frequency per bin = nyquits / binCount
 
       /** event at http://www.w3.org/TR/webaudio/#AudioProcessingEvent-section */
       processor.onaudioprocess = function(event) {
         analyser.getByteFrequencyData(fft);
-        var max = 0;
-        var maxBin = -1;
+        requestAnimationFrame(function() {
+          rects = svg.selectAll('rect').data(fft);
 
-        for (var i = 0; i < BIN_COUNT; i++) {
-          if (fft[i] > max) {
-            max = fft[i];
-            maxBin = i;
-          }
-        }
-        console.log(maxBin, max);
+          rects.enter().
+            append('rect').
+            attr('x', function(d, i) {
+              return xScale(i);
+            }).
+            attr('width', 975 / BIN_COUNT).
+            attr('fill', '#4DA9DF');
+
+            // update
+            rects.attr('y', function(d, i) {
+              return 600 - yScale(d);
+            }).
+            attr('height', function(d, i) {
+              return yScale(d)
+            });
+        });
       };
 
       // Load MP3
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', './OneDrop.mp3', true);
+      xhr.open('GET', './BoyOhBoy.mp3', true);
       xhr.responseType = 'arraybuffer';
       xhr.onload = function() {
         context.decodeAudioData(xhr.response, function(decoded) {
@@ -50,6 +66,7 @@
           source.connect(analyser);
           analyser.connect(processor);
           processor.connect(context.destination);
+          source.connect(context.destination);
           source.start(0);
         }, function() {
           console.log('error');
