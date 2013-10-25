@@ -38,6 +38,7 @@
         requestAnimationFrame(function() {
           rects = svg.selectAll('rect').data(fft);
 
+          // add new rects
           rects.enter().
             append('rect').
             attr('x', function(d, i) {
@@ -46,13 +47,14 @@
             attr('width', 975 / BIN_COUNT).
             attr('fill', '#4DA9DF');
 
-            // update
-            rects.attr('y', function(d, i) {
-              return 600 - yScale(d);
-            }).
-            attr('height', function(d, i) {
-              return yScale(d)
-            });
+          // update new and existing
+          rects.attr('y', function(d, i) {
+            return 600 - yScale(d);
+          }).
+          attr('height', function(d, i) {
+            return yScale(d)
+          });
+
         });
       };
 
