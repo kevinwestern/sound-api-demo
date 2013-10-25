@@ -3,12 +3,34 @@
   <head>
 
   </head>
-  <body>
+  <base href="/">
+  <body ng-app='tunes'>
 
-    <svg><</svg>
+    <ng-view></ng-view>
+    <svg></svg>
 
     <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
     <script src="//connect.soundcloud.com/sdk.js"></script>
+    <script>
+      var tunes = angular.module('tunes', ['ngRoute']);
+      tunes.controller('HomeCtrl', ['$scope', function($scope) {
+        $scope.name = 'world';
+      }]);
+      tunes.config(['$locationProvider', function(lp) {
+        lp.html5Mode(true);
+      }]);
+      tunes.config(['$routeProvider', function($routeProvider) {
+        $routeProvider.when('/', {
+          templateUrl: 'home.ng',
+          controller: 'HomeCtrl'
+        }).otherwise({
+          redirectTo: '/'
+        });
+      }]);
+      
+    </script>
     <script>
       SC.initialize({
         client_id: "03df9f6042735bc274cc6c6b27aaf6f7",
